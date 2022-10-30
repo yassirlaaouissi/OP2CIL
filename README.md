@@ -1,5 +1,5 @@
 # OP2CIL
-A converter from opcodes to CIL instructions, made because I cried during flareon9
+A converter from opcodes to CIL instructions, made because I cried during flareon9. May contain bugs, so please make issue if you feel the need for it to be fixed.
 
 
 
