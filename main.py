@@ -243,7 +243,9 @@ d88P" "Y88b 888   Y88b d88P  Y88b d88P  Y88b  888   888
 Y88b. .d88P 888        888"       Y88b  d88P  888   888      
  "Y88888P"  888        888888888   "Y8888P" 8888888 88888888
     """)
-
+## 0x00,0x02,0x73,0xe5,0x00,0x00,0x0a,0x0a,0x06,0x16,0x6f,0xa3,0x00,0x00,0x0a,0x6f,0xa4,0x00,0x00,0x0a,0x6f,0xe6,0x00,0x00,0x0a,0x0b,0x07,0x28,0xb3,0x00,0x00,0x06,
+# 0x0c,0x08,0x28,0xb9,0x00,0x00,0x06,0x0d,0x1a,0x8d,0x2f,0x00,0x00,0x01,0x25,0xd0,0x40,0x01,0x00,0x04,0x28,0x92,0x00,0x00,0x0a,0x09,0x28,0x80,0x00,0x00,0x06,0x13,
+# 0x04,0x11,0x04,0x07,0x03,0x28,0xb5,0x00,0x00,0x06,0x13,0x05,0x11,0x05,0x13,0x06,0x2b,0x00,0x11,0x06,0x2a
 def help():
 
     print()
@@ -252,33 +254,196 @@ def help():
     print("Example: main.py randombinary.exe 0x00,0x02,0x73,0xe5,0x00,0x00,0x0a,0x0a,0x06,0x16,0x6f,0xa3,0x00,0x00,0x0a,0x6f,0xa4,0x00,0x00,0x0a,0x6f,0xe6,0x00,0x00,0x0a,0x0b,0x07,0x28,0xb3,0x00,0x00,0x06,0x0c,0x08,0x28,0xb9,0x00,0x00,0x06,0x0d,0x1a,0x8d,0x2f,0x00,0x00,0x01,0x25,0xd0,0x40,0x01,0x00,0x04,0x28,0x92,0x00,0x00,0x0a,0x09,0x28,0x80,0x00,0x00,0x06,0x13,0x04,0x11,0x04,0x07,0x03,0x28,0xb5,0x00,0x00,0x06,0x13,0x05,0x11,0x05,0x13,0x06,0x2b,0x00,0x11,0x06,0x2a")
     print()
 
-def translate(list_of_opcodes):
-    index = 0
-    arguments = []
-    for entry in list_of_opcodes:
-        #print(entry)
-        if entry.lower() in arguments:
-            arguments.pop(arguments.index(entry))
-            continue
-        entry = "0x" + entry[2:].upper()
-        if "<" in str(trans_table.get(entry)):
-            #print(str(trans_table.get(entry)))
-            current_list_index = list_of_opcodes.index(entry.lower())
-            print(str(entry) + " // " + str(trans_table.get(entry)))
-            print(" args: ",
-            list_of_opcodes[current_list_index+1],
-            list_of_opcodes[current_list_index+2],
-            list_of_opcodes[current_list_index+3],
-            list_of_opcodes[current_list_index+4])
-            arguments = [list_of_opcodes[current_list_index+1],
-            list_of_opcodes[current_list_index+2],
-            list_of_opcodes[current_list_index+3],
-            list_of_opcodes[current_list_index+4]]
-            print()
-            continue
+def find_indices(list_to_check, item_to_find):
+    indices = []
+    for idx, value in enumerate(list_to_check):
+        if value == item_to_find:
+            indices.append(idx)
+    return indices
+
+def translate(list_of_opcodes,raw_opcode):
+    print("-----------------------------------------------------")
+    print("Supplied bytecode/opcode: " + "\n\n"+ str(raw_opcode))
+    print("-----------------------------------------------------")
+    print("Your CIL instructions are: ")
+    print()
+    i = 0
+    while i < len(list_of_opcodes):
+        bytecode = "0x" + list_of_opcodes[i][2:].upper()
+
+        # check if byte is valid opcode
+        if trans_table.get(bytecode) != None:
+            print(bytecode + " // " + str(trans_table.get(bytecode)))
+            #i+=1
         else:
-            print(str(entry) + " // " + str(trans_table.get(entry)))
-    #print("bing bong")
+            i+=1
+
+
+        # check if byte takes arguments
+        if "<" in trans_table.get(bytecode):
+            if "<int8" in trans_table.get(bytecode):
+                # increment i with number of bytes for argument
+                args=[list_of_opcodes[i+1]]
+                print(
+                    "   Arguments: ",
+                    list_of_opcodes[i+1])
+                print()
+                i += 1
+            elif "<int16" in trans_table.get(bytecode):
+                # increment i with number of bytes for argument
+                args=[list_of_opcodes[i+1],
+                    list_of_opcodes[i+2]]
+                print(
+                    "   Arguments: ",
+                    list_of_opcodes[i+1],
+                    list_of_opcodes[i+2])
+                print()
+                i += 2
+            elif "<int32" in trans_table.get(bytecode):
+                # increment i with number of bytes for argument
+                args=[list_of_opcodes[i+1],
+                    list_of_opcodes[i+2],
+                    list_of_opcodes[i+3],
+                    list_of_opcodes[i+4]]
+                print(
+                    "   Arguments: ",
+                    list_of_opcodes[i+1],
+                    list_of_opcodes[i+2],
+                    list_of_opcodes[i+3],
+                    list_of_opcodes[i+4])
+                print()
+                i += 4
+            elif "<int64" in trans_table.get(bytecode):
+                # increment i with number of bytes for argument
+                args=[list_of_opcodes[i+1],
+                    list_of_opcodes[i+2],
+                    list_of_opcodes[i+3],
+                    list_of_opcodes[i+4],
+                    list_of_opcodes[i+5],
+                    list_of_opcodes[i+6],
+                    list_of_opcodes[i+7],
+                    list_of_opcodes[i+8]]
+                print(
+                    "   Arguments: ",
+                    list_of_opcodes[i+1],
+                    list_of_opcodes[i+2],
+                    list_of_opcodes[i+3],
+                    list_of_opcodes[i+4],
+                    list_of_opcodes[i+5],
+                    list_of_opcodes[i+6],
+                    list_of_opcodes[i+7],
+                    list_of_opcodes[i+8])
+                print()
+                i += 8
+            if "<uint8" in trans_table.get(bytecode):
+                # increment i with number of bytes for argument
+                args=[list_of_opcodes[i+1]]
+                print(
+                    "   Arguments: ",
+                    list_of_opcodes[i+1])
+                print()
+                i += 1
+            elif "<uint16" in trans_table.get(bytecode):
+                # increment i with number of bytes for argument
+                args=[list_of_opcodes[i+1],
+                    list_of_opcodes[i+2]]
+                print(
+                    "   Arguments: ",
+                    list_of_opcodes[i+1],
+                    list_of_opcodes[i+2])
+                print()
+                i += 2
+            elif "<uint32" in trans_table.get(bytecode):
+                # increment i with number of bytes for argument
+                args=[list_f_opcodes[i+1],
+                    list_of_opcodes[i+2],
+                    list_of_opcodes[i+3],
+                    list_of_opcodes[i+4]]
+                print(
+                    "   Arguments: ",
+                    list_of_opcodes[i+1],
+                    list_of_opcodes[i+2],
+                    list_of_opcodes[i+3],
+                    list_of_opcodes[i+4])
+                print()
+                i += 4
+            elif "<uint64" in trans_table.get(bytecode):
+                # increment i with number of bytes for argument
+                args=[list_of_opcodes[i+1],
+                    list_of_opcodes[i+2],
+                    list_of_opcodes[i+3],
+                    list_of_opcodes[i+4],
+                    list_of_opcodes[i+5],
+                    list_of_opcodes[i+6],
+                    list_of_opcodes[i+7],
+                    list_of_opcodes[i+8]]
+                print(
+                    "   Arguments: ",
+                    list_of_opcodes[i+1],
+                    list_of_opcodes[i+2],
+                    list_of_opcodes[i+3],
+                    list_of_opcodes[i+4],
+                    list_of_opcodes[i+5],
+                    list_of_opcodes[i+6],
+                    list_of_opcodes[i+7],
+                    list_of_opcodes[i+8])
+                print()
+                i += 8
+            elif "<float32" in trans_table.get(bytecode):
+                # increment i with number of bytes for argument
+                args=[list_f_opcodes[i+1],
+                    list_of_opcodes[i+2],
+                    list_of_opcodes[i+3],
+                    list_of_opcodes[i+4]]
+                print(
+                    "   Arguments: ",
+                    list_of_opcodes[i+1],
+                    list_of_opcodes[i+2],
+                    list_of_opcodes[i+3],
+                    list_of_opcodes[i+4])
+                print()
+                i += 4
+            elif "<float64" in trans_table.get(bytecode):
+                # increment i with number of bytes for argument
+                args=[list_of_opcodes[i+1],
+                    list_of_opcodes[i+2],
+                    list_of_opcodes[i+3],
+                    list_of_opcodes[i+4],
+                    list_of_opcodes[i+5],
+                    list_of_opcodes[i+6],
+                    list_of_opcodes[i+7],
+                    list_of_opcodes[i+8]]
+                print(
+                    "   Arguments: ",
+                    list_of_opcodes[i+1],
+                    list_of_opcodes[i+2],
+                    list_of_opcodes[i+3],
+                    list_of_opcodes[i+4],
+                    list_of_opcodes[i+5],
+                    list_of_opcodes[i+6],
+                    list_of_opcodes[i+7],
+                    list_of_opcodes[i+8])
+                print()
+                i += 8
+            else:
+                # increment i with number of bytes for argument
+                #print(list_of_opcodes[i])
+                try:
+                    args=[list_of_opcodes[i+1],
+                        list_of_opcodes[i+2],
+                        list_of_opcodes[i+3],
+                        list_of_opcodes[i+4]]
+                    print(
+                        "   Arguments: ",
+                        list_of_opcodes[i+1],
+                        list_of_opcodes[i+2],
+                        list_of_opcodes[i+3],
+                        list_of_opcodes[i+4])
+                    print()
+                    i += 4
+                except:
+                    continue
+        i+=1
 
 if __name__ == "__main__":
     banner()
@@ -299,4 +464,4 @@ if __name__ == "__main__":
                 print("Your OPCODE is not in the right format (0x01,0x02,0x03...)")
                 help()
                 sys.exit(2)
-        translate(list_of_opcodes)
+        translate(list_of_opcodes,opcode)
